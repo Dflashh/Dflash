@@ -3,6 +3,8 @@ import { toCanvas } from 'html-to-image'
 import { jsPDF } from 'jspdf'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import PreviewViewport from './components/PreviewViewport'
+import useMobileViewport from './hooks/useMobileViewport'
 
 const defaultMarkdown = `그는 한참 동안 아무 말도 하지 않았다.
 
@@ -56,8 +58,15 @@ const toolbarItems = [
 ]
 
 function App() {
+  const shellRef = useRef(null)
   const previewRef = useRef(null)
   const textareaRef = useRef(null)
+  const editorButtonRef = useRef(null)
+  const closeButtonRef = useRef(null)
+  const editorScrollRef = useRef(null)
+  const mobile = useMobileViewport(shellRef)
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [editorTab, setEditorTab] = useState('write')
 
   const [theme, setTheme] = useState(() => localStorage.getItem('glass-theme') || 'light')
   const [title, setTitle] = useState(() => localStorage.getItem('glass-title') ?? '오늘의 기록')
@@ -90,6 +99,27 @@ function App() {
     localStorage.setItem('glass-meta', meta)
     localStorage.setItem('glass-markdown', markdown)
   }, [title, meta, markdown])
+
+  useEffect(() => {
+    if (!mobile) setEditorOpen(false)
+  }, [mobile])
+
+  useEffect(() => {
+    if (!mobile || !editorOpen) return
+    const frame = requestAnimationFrame(() => closeButtonRef.current?.focus({ preventScroll: true }))
+    return () => cancelAnimationFrame(frame)
+  }, [mobile, editorOpen])
+
+  const openEditor = (tab = 'write') => {
+    setEditorTab(tab)
+    setEditorOpen(true)
+    if (editorScrollRef.current) editorScrollRef.current.scrollTop = 0
+  }
+
+  const closeEditor = () => {
+    setEditorOpen(false)
+    requestAnimationFrame(() => editorButtonRef.current?.focus({ preventScroll: true }))
+  }
 
   const updateSetting = (key, value) => {
     setSettings((previous) => ({ ...previous, [key]: value }))
@@ -212,7 +242,10 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div ref={shellRef} className={`app-shell${mobile && editorOpen ? ' mobile-editor-open' : ''}`}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && mobile && editorOpen) closeEditor()
+      }}>
       <div className="ambient ambient-one" />
       <div className="ambient ambient-two" />
 
@@ -251,14 +284,39 @@ function App() {
       </header>
 
       <main className="workspace">
-        <aside className="editor glass">
+        <aside id="document-editor" className="editor glass" aria-label="문서 편집"
+          aria-hidden={mobile && !editorOpen ? true : undefined}
+          inert={mobile && !editorOpen ? true : undefined}
+          onTransitionEnd={(event) => {
+            if (event.target === event.currentTarget && event.propertyName === 'transform'
+              && mobile && editorOpen && document.activeElement === document.body) {
+              closeButtonRef.current?.focus({ preventScroll: true })
+            }
+          }}>
+          <div className="sheet-handle" aria-hidden="true" />
           <div className="panel-heading">
             <div>
               <span className="eyebrow">WRITE</span>
               <h1>글 작성</h1>
             </div>
-            <span className="save-state">자동 저장</span>
+            <div className="editor-heading-actions">
+              <span className="save-state">자동 저장</span>
+              <button ref={closeButtonRef} className="sheet-close" type="button" onClick={closeEditor} aria-label="편집창 닫기">완료 ↓</button>
+            </div>
           </div>
+
+          <nav className="editor-tabs" aria-label="편집 메뉴">
+            {[['write', '글 작성'], ['style', '조판'], ['export', '저장']].map(([id, label]) => (
+              <button key={id} type="button" aria-pressed={editorTab === id}
+                aria-controls={`editor-${id}`} onClick={() => {
+                  setEditorTab(id)
+                  if (editorScrollRef.current) editorScrollRef.current.scrollTop = 0
+                }}>{label}</button>
+            ))}
+          </nav>
+
+          <div className="editor-scroll" ref={editorScrollRef}>
+          <div id="editor-write" hidden={mobile && editorTab !== 'write'}>
 
           <div className="compact-fields">
             <label>
@@ -289,6 +347,8 @@ function App() {
             />
           </div>
 
+          </div>
+          <div id="editor-style" hidden={mobile && editorTab !== 'style'}>
           <details className="settings-card" open>
             <summary>조판 설정</summary>
             <div className="settings-content">
@@ -327,8 +387,9 @@ function App() {
               </div>
             </div>
           </details>
+          </div>
 
-          <div className="export-card">
+          <div id="editor-export" className="export-card" hidden={mobile && editorTab !== 'export'}>
             <div className="export-head">
               <div>
                 <span className="eyebrow">EXPORT</span>
@@ -346,14 +407,16 @@ function App() {
             </div>
             <p>PNG·WEBP는 긴 글 전체를 하나의 세로 이미지로 저장하고, PDF는 A4 여러 페이지로 자동 분할합니다.</p>
           </div>
+          </div>
         </aside>
 
         <section className="preview-area">
           <div className="preview-label">
-            <span>PREVIEW</span>
+            <span>{mobile && editorOpen ? '실시간 미리보기' : 'PREVIEW'}</span>
             <span>{markdown.length.toLocaleString()} chars</span>
           </div>
 
+          <PreviewViewport mobile={mobile} compact={editorOpen} pageWidth={settings.pageWidth}>
           <article
             ref={previewRef}
             className="story-page"
@@ -383,8 +446,18 @@ function App() {
               <span>✦</span>
             </footer>
           </article>
+          </PreviewViewport>
         </section>
       </main>
+
+      <div className="mobile-dock" hidden={mobile && editorOpen}>
+        <button ref={editorButtonRef} className="open-editor" type="button"
+          aria-controls="document-editor" aria-expanded={editorOpen} onClick={() => openEditor()}>
+          <span aria-hidden="true">✎</span> 글 작성 <span aria-hidden="true">↑</span>
+        </button>
+        <button className="open-export" type="button" aria-controls="document-editor"
+          onClick={() => openEditor('export')}>저장</button>
+      </div>
     </div>
   )
 }
