@@ -1,7 +1,7 @@
 {
   "name": "glass-talk-studio",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,7 +14,8 @@
     "jspdf": "4.2.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1",
     "vite": "8.3.0"
-  },
-  "devDependencies": {}
+  }
 }

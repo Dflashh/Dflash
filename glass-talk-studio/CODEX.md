@@ -1,206 +1,111 @@
-# Codex 작업 지침 — GlassTalk Studio
+# CODEX.md — Glasscript project direction
 
-이 문서는 Codex가 이 프로젝트를 이어서 개발할 때 따라야 할 제품/디자인/기술 지침이다.
+## Product definition
 
-## 1. 제품 목적
+This is **not a chat bubble card maker**.
 
-GlassTalk Studio는 AI 캐릭터 채팅 중 공유하고 싶은 부분을 예쁘고 읽기 좋은 카드로 만들어 이미지 또는 PDF로 저장하는 웹 도구다.
+The core product is a browser-based long-form text compositor for people who want to share excerpts from AI character chats, roleplay scenes, prose, dialogue, or notes as a beautiful **single continuous novel/document page**.
 
-핵심 사용 흐름:
+Think:
 
-1. 사용자가 텍스트/대화를 입력한다.
-2. 캐릭터 이미지와 디자인을 선택한다.
-3. 오른쪽 또는 상단에서 결과물을 실시간으로 미리본다.
-4. PNG / WEBP / PDF 중 원하는 형식으로 저장한다.
+> Markdown editor → elegant long-form typesetting → export the entire result as PNG / WEBP / PDF.
 
-회원가입은 1차 목표가 아니다. 서버 저장도 기본적으로 하지 않는다.
+Do not reintroduce chat bubbles, messenger layouts, profile avatars, or card-by-card dialogue UI unless explicitly requested later.
 
-## 2. 디자인 방향
+## UX principles
 
-### 사이트 UI
+1. The text itself is the focus.
+2. Preview should feel like reading a novel, manuscript, essay, or literary archive.
+3. The output should be one continuous vertical composition, not a collection of cards.
+4. Editor controls should stay compact and secondary.
+5. The site shell uses restrained iOS-like glass UI.
+6. Avoid excessive gradients, giant rounded cards, decorative stickers, or playful social-media UI by default.
 
-- Apple/iOS의 glass UI에서 영감을 받은 미니멀 인터페이스
-- 과도한 네온, 과도한 블러, 게임 UI 느낌 금지
-- 반투명 패널 + 얇은 테두리 + 은은한 그림자
-- 화면의 정보 밀도를 낮게 유지
-- 둥근 모서리와 넓은 여백 사용
-- 애니메이션은 짧고 차분하게
+## Theme
 
-### 라이트 모드
+### Light
+- pale cool background
+- sky-blue accent
+- translucent white glass panels
+- output paper is warm near-white
 
-- 배경: 매우 옅은 푸른빛 회백색
-- 기본 포인트: 하늘색
-- 추천 accent: `#5EB8FF`
-- 추천 accent strong: `#2698F3`
+### Dark
+- near-black neutral background
+- muted champagne-gold accent
+- charcoal glass panels
+- output paper is warm deep charcoal, not pure black
 
-### 다크 모드
+Avoid saturated yellow/gold.
 
-- 배경: 블랙에 가까운 차콜
-- 기본 포인트: 차분한 골드/샴페인 골드
-- 추천 accent: `#D6B66A`
-- 추천 accent strong: `#E8D18F`
-- 순수한 노란색 `#FFD700` 느낌은 피할 것
+## Markdown
 
-## 3. 매우 중요한 UX 원칙
+Rendering currently uses:
 
-- 사이트 디자인과 사용자가 만드는 카드 디자인은 분리한다.
-- 사이트는 항상 iOS glass 계열을 유지한다.
-- 결과 카드 템플릿은 다양한 스타일을 지원한다.
-- PC: 편집기 + 미리보기 2단 구조
-- 모바일: 미리보기 상단 + 편집 영역 하단 구조 권장
-- 모바일에서는 터치 타깃을 충분히 크게 만든다.
-- 불필요한 모달을 남발하지 않는다.
+- `react-markdown`
+- `remark-gfm`
+- raw HTML disabled (`skipHtml`)
 
-## 4. 저장 형식 요구사항
+Support and preserve:
 
-반드시 다음 3개 모두 유지:
+- headings
+- paragraphs
+- bold / italic
+- blockquotes
+- horizontal rules
+- ordered/unordered lists
+- links
+- code / code blocks
+- GFM tables
+- task lists
+
+Future Markdown improvements may include custom scene-break syntax or custom dialogue styling, but only if it still reads as continuous prose.
+
+## Export requirements
+
+Required export formats:
 
 - PNG
 - WEBP
 - PDF
 
-추후 추가할 옵션:
+PNG/WEBP should export the entire continuous page as one tall image when browser canvas limits allow it.
 
-- PNG: 투명 배경 지원 여부
-- PNG/WEBP: 1x / 2x / 3x 해상도
-- WEBP: 품질 70 / 80 / 90 / 100
-- PDF: 한 페이지 / 긴 글 자동 페이지 분할
+PDF should paginate the rendered page into A4 pages automatically.
 
-내보내기 결과는 화면 미리보기와 최대한 동일해야 한다.
+Do not upload user content to a server for export.
 
-## 5. 개인정보/보안 방향
+## Privacy
 
-가능한 모든 편집과 내보내기는 브라우저에서 처리한다.
+Keep content processing client-side. The current autosave uses localStorage only.
 
-- 채팅 내용 서버 전송 금지
-- 업로드 이미지 서버 전송 금지
-- 사용자의 작업물을 자동 업로드하지 않는다.
-- 외부 이미지 URL 직접 사용은 CORS 문제 때문에 기본 기능으로 권장하지 않는다.
-- 이미지 입력은 로컬 파일 업로드 우선
+No analytics, backend, account system, cloud saving, or remote text processing should be added without explicit request.
 
-## 6. 다음 구현 우선순위
+## Development priorities
 
-### Phase 1 — 현재 MVP 안정화
+### Current
+- Markdown long-form editor
+- continuous typeset preview
+- responsive UI
+- theme toggle
+- typography controls
+- PNG / WEBP / PDF export
 
-- 현재 빌드/저장 기능 오류 확인
-- 모바일 Safari 확인
-- Chrome/Edge/Firefox 확인
-- 긴 텍스트 레이아웃 깨짐 수정
-- 파일명이 비었거나 특수문자가 있어도 안전하게 저장
+### Next useful improvements
+1. Safer chunked PNG/WEBP export for extremely long documents that exceed browser canvas limits.
+2. Custom background / paper presets while keeping text readability high.
+3. Optional cover/header presets.
+4. Import `.md` / `.txt` files.
+5. Export/import project JSON.
+6. Optional custom fonts with careful export compatibility.
+7. Share-size presets, but never force the continuous document into chat bubbles.
 
-### Phase 2 — 카드 템플릿 시스템
+## Quality bar
 
-최소 다음 템플릿 추가:
-
-1. Minimal
-2. Romantic
-3. Dark
-4. Messenger
-5. Novel Page
-
-템플릿은 React 컴포넌트로 분리하고 데이터와 스타일을 분리한다.
-
-추천 구조:
-
-```text
-src/
-  components/
-  templates/
-    MinimalTemplate.jsx
-    RomanticTemplate.jsx
-    DarkTemplate.jsx
-    MessengerTemplate.jsx
-    NovelTemplate.jsx
-  lib/
-    exportCard.js
-  App.jsx
-```
-
-### Phase 3 — 편집 기능
-
-- 카드 비율 선택
-  - 자유형
-  - 1:1
-  - 4:5
-  - 9:16
-- 배경색
-- 배경 이미지 업로드
-- 배경 blur
-- 테두리
-- 그림자
-- 말풍선 색상
-- 글자 크기
-- 행간
-- 카드 안쪽 여백
-- 워터마크 표시/숨김
-
-### Phase 4 — 대화 입력 개선
-
-한 개의 큰 텍스트 입력창에 채팅 로그를 붙여 넣으면 자동 파싱하도록 개선.
-
-예:
-
-```text
-루카: 오늘 어디 갈래?
-나: 글쎄.
-루카: 바다 보러 갈까?
-```
-
-자동으로 캐릭터/사용자 메시지를 구분해서 렌더링.
-
-파싱 실패 시 원문을 보존하고 사용자가 수동으로 수정할 수 있어야 한다.
-
-### Phase 5 — 장문 지원
-
-- 아주 긴 채팅도 렌더링
-- PNG/WEBP는 세로로 긴 이미지 허용
-- PDF는 자동 페이지 분할
-- 페이지 사이에서 텍스트 줄이 어색하게 잘리지 않도록 처리
-
-## 7. 코드 품질 규칙
-
-- React 컴포넌트를 지나치게 큰 한 파일에 계속 추가하지 말 것
-- 기능이 늘어나면 `components`, `templates`, `lib`로 분리
-- export 로직은 별도 유틸로 분리
-- CSS 변수로 테마 토큰 관리
-- 외부 라이브러리는 꼭 필요한 경우만 추가
-- 정적 GitHub Pages 배포가 깨지지 않도록 서버 의존 기능 금지
-
-## 8. GitHub Pages 관련 주의사항
-
-- Vite `base`는 현재 `./` 사용
-- React Router를 추가할 경우 새로고침 404 문제를 반드시 고려
-- 가능하면 초기 버전은 단일 페이지 유지
-- GitHub Actions workflow를 삭제하거나 임의 변경하지 말 것
-
-## 9. 완료 조건
-
-새 기능을 구현한 뒤 최소한 아래를 확인한다.
+Before committing changes:
 
 ```bash
 npm install
 npm run build
 ```
 
-빌드가 성공해야 한다.
-
-또한 브라우저에서:
-
-- 라이트 모드 정상
-- 다크 모드 정상
-- 이미지 업로드 정상
-- PNG 저장 정상
-- WEBP 저장 정상
-- PDF 저장 정상
-- 모바일 레이아웃 정상
-
-을 확인한다.
-
-## 10. 절대 바꾸지 말아야 하는 제품 요구
-
-- PNG / WEBP / PDF 세 형식 제공
-- 사이트 자체는 깔끔한 iOS glass 스타일
-- 라이트 포인트는 하늘색 계열
-- 다크 포인트는 골드 계열
-- AI 캐릭터 채팅 공유물을 예쁘게 만드는 용도
-- 사용자가 입력한 내용을 기본적으로 서버에 저장하지 않는 구조
+Ensure GitHub Pages still works with the existing Vite base configuration and deployment workflow.

@@ -1,62 +1,53 @@
-# GlassTalk Studio
+# Glasscript — Markdown Story Studio
 
-AI 캐릭터 채팅에서 공유하고 싶은 장면을 깔끔한 카드로 만들어 **PNG / WEBP / PDF**로 저장하는 정적 웹앱입니다.
+AI 캐릭터 채팅에서 공유하고 싶은 장면, 대사, 지문 등을 **소설/문서처럼 하나의 긴 페이지로 조판**하고 PNG, WEBP, PDF로 저장하는 브라우저 기반 도구입니다.
 
-## 핵심 방향
+## 핵심 기능
 
-- 회원가입/서버 없이 브라우저에서 동작
-- 사용자가 입력한 채팅 내용과 업로드 이미지는 서버에 전송하지 않음
-- iOS glass / liquid-glass 계열의 깨끗한 UI
-- 라이트 모드 포인트: 하늘색
-- 다크 모드 포인트: 차분한 골드
-- GitHub Pages 배포 가능
-
-## 기술 스택
-
-- React
-- Vite
-- html-to-image
-- jsPDF
-- GitHub Actions + GitHub Pages
+- 긴 글을 하나의 연속된 문서로 실시간 미리보기
+- Markdown 렌더링
+  - 제목 (`#`, `##`, `###`)
+  - 굵게 / 기울임
+  - 인용문
+  - 구분선
+  - 목록
+  - 표, 체크리스트 등 GFM 문법
+- iOS glass 스타일 UI
+- Light: sky blue accent
+- Dark: champagne gold accent
+- 본문 글꼴 / 크기 / 줄 간격 / 폭 / 여백 조절
+- PNG / WEBP: 전체 문서를 긴 세로 이미지로 저장
+- PDF: A4 여러 페이지 자동 분할
+- 작성 내용은 브라우저 localStorage에 자동 저장
+- 별도 서버 없이 GitHub Pages에서 동작
 
 ## 로컬 실행
 
-Node.js 24 LTS 권장.
+Node.js 24 LTS를 사용합니다.
 
 ```bash
 npm ci
 npm run dev
 ```
 
-브라우저에서 Vite가 안내하는 로컬 주소를 열면 됩니다.
-
-## 프로덕션 빌드
+프로덕션 빌드:
 
 ```bash
 npm run build
-npm run preview
 ```
 
-## 현재 기능
+## GitHub Pages
 
-- 라이트/다크 모드
-- 제목 / 설명 / 캐릭터명 / 캐릭터 대사 / 사용자 대사 / 지문 입력
-- 캐릭터 이미지 업로드
-- 폰트 및 일부 레이아웃 설정
-- 실시간 카드 미리보기
-- PNG 저장
-- WEBP 저장
-- PDF 저장
-- 모바일 반응형 UI
+이 앱은 `Dflashh/Dflash` 저장소의 일부입니다. 저장소 루트의
+`.github/workflows/deploy.yml`이 `main` 변경 시 빌드하고 자동 배포합니다.
+앱 폴더 안의 workflow는 단독 배포 참고용이며 이 저장소에서는 실행되지 않습니다.
 
-## GitHub Pages 배포
+공개 주소: https://dflashh.github.io/Dflash/glass-talk/
 
-1. 새 GitHub 저장소를 만든다.
-2. 이 폴더의 파일을 저장소에 push한다.
-3. GitHub 저장소에서 **Settings → Pages**로 이동한다.
-4. Build and deployment의 Source를 **GitHub Actions**로 선택한다.
-5. `main` 브랜치에 push하면 `.github/workflows/deploy.yml`이 자동으로 배포한다.
+## 보안 / 개인정보
 
-## 권장 다음 작업
+입력한 텍스트는 외부 서버로 전송하지 않습니다. 현재 자동 저장은 사용자의 브라우저 localStorage에서만 이루어집니다.
 
-자세한 구현 우선순위와 디자인 규칙은 `CODEX.md` 참고.
+## 참고
+
+브라우저는 초대형 Canvas 크기에 제한이 있으므로 수만 픽셀을 넘어가는 매우 긴 문서는 PNG/WEBP 저장이 제한될 수 있습니다. PDF는 A4 페이지로 분할되지만, 렌더링용 원본 캔버스가 브라우저 한도를 넘는 극단적으로 긴 문서는 이후 chunk export 방식으로 개선할 수 있습니다.

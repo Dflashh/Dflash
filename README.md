@@ -3,7 +3,7 @@
 Dflash의 웹사이트 모음. 하나의 GitHub Pages 배포에서 사이트별 경로를 사용합니다.
 
 - 메인: https://dflashh.github.io/Dflash/
-- GlassTalk Studio: https://dflashh.github.io/Dflash/glass-talk/
+- Glasscript (기존 GlassTalk 주소 유지): https://dflashh.github.io/Dflash/glass-talk/
 
 ## 개발
 
